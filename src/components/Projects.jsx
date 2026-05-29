@@ -68,7 +68,7 @@ const projects = [
       'Polished responsive typography and colors matching the warm ivory theme'
     ],
     demoLink: '#',
-    githubLink: 'https://github.com/Yesayaparapat/myportofolio'
+    githubLink: 'https://github.com/Yesayaparapat/myportofolio.git'
   }
 ];
 
