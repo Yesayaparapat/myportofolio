@@ -50,7 +50,7 @@ const projects = [
       'Smooth micro-interactions and transitions for an intuitive client-side consultation experience'
     ],
     demoLink: '#',
-    githubLink: '#'
+    githubLink: 'https://github.com/detamor/frontend_SistemPakar.git'
   },
   {
     title: 'Personal Portfolio Website',
@@ -68,7 +68,7 @@ const projects = [
       'Polished responsive typography and colors matching the warm ivory theme'
     ],
     demoLink: '#',
-    githubLink: '#'
+    githubLink: 'https://github.com/Yesayaparapat/myportofolio'
   }
 ];
 
