@@ -32,17 +32,17 @@ const Hero = () => {
           <p className="text-sm md:text-2xl text-paragraph mb-1 md:mb-2 font-medium">
             <span className='text-headline'>Hello ,</span> my name is
           </p>
-          <h2 className="text-xl md:text-6xl font-extrabold text-headline mb-2 md:mb-4 leading-tight">
+          <h1 className="text-xl md:text-6xl font-extrabold text-headline mb-2 md:mb-4 leading-tight">
             <span className="text-primary-btn drop-shadow-[3px_3px_0_rgba(0,0,0,0.15)]">
               <SplitText text="Yesaya" delay={0.06} />
             </span>{' '}
             <span className="text-white drop-shadow-[3px_3px_0_rgba(0,0,0,0.15)]">
               <SplitText text="Parapat" delay={0.06} className="[-webkit-text-stroke:1px_#020826] text-white" />
             </span>
-          </h2>
-          <h1 className="text-lg md:text-5xl font-extrabold text-headline leading-tight mb-4 md:mb-6 opacity-90">
-            I am a <br /> <ShinyText text="FULLSTACK DEVELOPER." speed={3.5} className="font-extrabold text-headline leading-tight" />
           </h1>
+          <h2 className="text-lg md:text-5xl font-extrabold text-headline leading-tight mb-4 md:mb-6 opacity-90">
+            I am a <br /> <ShinyText text="FULLSTACK DEVELOPER." speed={3.5} className="font-extrabold text-headline leading-tight" />
+          </h2>
           <p className="text-xs md:text-xl text-paragraph max-w-lg mb-4 md:mb-8 leading-relaxed">
             I build scalable web applications with a focus on modern user interfaces and high performance. Let's create something amazing together.
           </p>
