@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 
 // Import PDF certificates from certifikat folder
+import certBootcamp from '../assets/certifikat/FULL STACK DEVELOPER - Yesaya Parapat - E-certificate Harisenin Bootcamp Full Stack Developer Batch 18.pdf';
+import certRiseUp from '../assets/certifikat/Rise Up+ E-Certificate - Yesaya Parapat.pdf';
 import certDatabase from '../assets/certifikat/certifikat database.pdf';
 import certCheatCode from '../assets/certifikat/idcamp-virtual-roadshow-x-algobash-ctrlcareer-your-tech-career-cheat-code-certificate.pdf';
 import certLiveFrontendBackend from '../assets/certifikat/idcamp-x-dicoding-live-6-frontend-vs-backend-a-never-ending-love-hate-relationship-certificate.pdf';
@@ -12,6 +14,8 @@ import sertifikat5 from '../assets/certifikat/sertifikat5.pdf';
 import sertifikat6 from '../assets/certifikat/sertifikat6.pdf';
 
 // Import certificate image previews from certifikat-img folder
+import imgBootcamp from '../assets/certifikat-img/fullstack.png';
+import imgRiseUp from '../assets/certifikat-img/riseUp.png';
 import imgDatabase from '../assets/certifikat-img/database.png';
 import imgCheatCode from '../assets/certifikat-img/ctrl+career.png';
 import imgLiveFrontendBackend from '../assets/certifikat-img/idcamp x dicoding.png';
@@ -23,6 +27,28 @@ import imgSertifikat5 from '../assets/certifikat-img/p ke logika pemograman.png'
 import imgSertifikat6 from '../assets/certifikat-img/pemograman dasar untuk menjadi pengembang softwarte.png';
 
 const certificates = [
+  {
+    title: 'Full Stack Developer Bootcamp (Batch 18)',
+    issuer: 'Harisenin.com',
+    date: '20 Agustus 2026',
+    credentialId: 'HSBC/FSD/019/20260820080',
+    credentialUrl: '',
+    image: imgBootcamp,
+    file: certBootcamp,
+    skills: ['Full Stack Web Development', 'Frontend Architecture', 'Backend & RESTful API', 'Database Management', 'Modern JavaScript / React', 'Node.js'],
+    description: 'Sertifikasi kelulusan program intensif Full Stack Developer Bootcamp (Batch 18) dari Harisenin.com yang membuktikan kompetensi menyeluruh dalam membangun aplikasi web modern end-to-end, mulai dari arsitektur frontend responsif hingga integrasi API backend dan manajemen basis data.'
+  },
+  {
+    title: 'RISE UP+ : Career Preparation Program',
+    issuer: 'Harisenin.com',
+    date: 'Agustus 2026',
+    credentialId: 'Harisenin-RiseUp-2026',
+    credentialUrl: '',
+    image: imgRiseUp,
+    file: certRiseUp,
+    skills: ['Career Preparation', 'Professional Growth', 'Interview Preparation', 'Workplace Readiness', 'Communication'],
+    description: 'Sertifikat kelulusan program akselerasi karir profesional intensif selama 3 minggu oleh Harisenin.com, melatih kesiapan karir, pemahaman industri teknologi, personal branding, dan strategi wawancara kerja.'
+  },
   {
     title: 'Information Technology Specialist - Databases',
     issuer: 'Certiport (NCS Pearson)',
@@ -176,7 +202,7 @@ const Certificates = () => {
         {/* Header container with title and slider controls */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
           <div>
-            <h2 className="text-4xl font-bold text-headline mb-4">Certifications</h2>
+            <h2 className="text-4xl font-bold text-headline mb-4">Course & Certification</h2>
             <p className="text-paragraph max-w-lg text-sm md:text-base">
               Kredensial dan sertifikat profesional yang telah saya selesaikan untuk memvalidasi keahlian teknis saya.
             </p>

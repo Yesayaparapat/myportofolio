@@ -34,7 +34,7 @@ const Navbar = () => {
           <a href="#skills" className="hover:text-headline transition-colors">Skills</a>
           <a href="#experience" className="hover:text-headline transition-colors">Experience</a>
           <a href="#projects" className="hover:text-headline transition-colors">Projects</a>
-          <a href="#certificates" className="hover:text-headline transition-colors">Certificates</a>
+          <a href="#certificates" className="hover:text-headline transition-colors">Course &amp; Certification</a>
           <a href="#contact" className="hover:text-headline transition-colors">Contact</a>
         </div>
         <button className="md:hidden text-headline" aria-label="Open navigation menu">

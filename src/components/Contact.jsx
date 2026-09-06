@@ -78,37 +78,37 @@ const Contact = () => {
         </p>
 
         {/* Responsive Grid Layout */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-          {contactMethods.map((method, index) => (
-            <a
-              key={index}
-              href={method.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block cursor-pointer"
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+        {contactMethods.map((method, index) => (
+          <a
+            key={index}
+            href={method.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block cursor-pointer"
+          >
+            <GlowCard
+              glowColor={method.glowColor}
+              className={`bg-white rounded-3xl p-6 border-2 border-ill-secondary flex flex-col items-center justify-center text-center group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${method.color}`}
             >
-              <GlowCard
-                glowColor={method.glowColor}
-                className={`bg-white rounded-3xl p-6 border-2 border-ill-secondary flex flex-col items-center justify-center text-center group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${method.color}`}
-              >
-                {/* Icon Container */}
-                <div className="mb-4 flex items-center justify-center flex-grow">
-                  {method.icon}
-                </div>
+              {/* Icon Container */}
+              <div className="mb-4 flex items-center justify-center flex-grow">
+                {method.icon}
+              </div>
 
-                {/* Label */}
-                <span className="text-xs font-bold uppercase tracking-wider text-paragraph/60 mb-1 block">
-                  {method.name}
-                </span>
+              {/* Label */}
+              <span className="text-xs font-bold uppercase tracking-wider text-paragraph/60 mb-1 block">
+                {method.name}
+              </span>
 
-                {/* Value */}
-                <span className="text-sm font-bold text-headline group-hover:text-primary-btn transition-colors break-all w-full">
-                  {method.value}
-                </span>
-              </GlowCard>
-            </a>
-          ))}
-        </div>
+              {/* Value */}
+              <span className="text-sm font-bold text-headline group-hover:text-primary-btn transition-colors break-all w-full">
+                {method.value}
+              </span>
+            </GlowCard>
+          </a>
+        ))}
+      </div>
       </div>
     </section>
   );
