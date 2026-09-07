@@ -344,11 +344,18 @@ const Projects = () => {
   const [selectedProject, setSelectedProject] = useState(null);
   const [currentImgIndex, setCurrentImgIndex] = useState(0);
   const [activeCategory, setActiveCategory] = useState('all'); // 'all' | 'featured' | 'learning'
+  const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'slider'
   const scrollRef = useRef(null);
 
-  // Split projects into two dedicated groups
-  const featuredProjects = projects.filter((p) => p.category === 'featured');
-  const learningProjects = projects.filter((p) => p.category === 'learning');
+  const featuredCount = projects.filter((p) => p.category === 'featured').length;
+  const learningCount = projects.filter((p) => p.category === 'learning').length;
+
+  // Filtered projects list based on active category
+  const filteredProjects = projects.filter((project) => {
+    if (activeCategory === 'featured') return project.category === 'featured';
+    if (activeCategory === 'learning') return project.category === 'learning';
+    return true;
+  });
 
   // Prevent background scrolling when modal is active
   useEffect(() => {
@@ -367,6 +374,13 @@ const Projects = () => {
     setCurrentImgIndex(0);
   }, [selectedProject]);
 
+  // Reset horizontal slider scroll position when category or view mode changes
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo({ left: 0, behavior: 'smooth' });
+    }
+  }, [activeCategory, viewMode]);
+
   // Support closing modal with Escape key
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -378,7 +392,7 @@ const Projects = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Handle horizontal scrolling behavior for Featured Projects Slider
+  // Handle horizontal scrolling behavior for Slider View
   const scroll = (direction) => {
     if (scrollRef.current) {
       const { scrollLeft } = scrollRef.current;
@@ -389,6 +403,142 @@ const Projects = () => {
         behavior: 'smooth'
       });
     }
+  };
+
+  // Reusable project card renderer for both Grid and Slider modes
+  const renderProjectCard = (project, mode) => {
+    const isFeatured = project.category === 'featured';
+    const isSlider = mode === 'slider';
+
+    return (
+      <GlowCard
+        key={project.title}
+        className={`bg-white rounded-3xl overflow-hidden border-2 border-ill-secondary hover:shadow-2xl transition-all duration-300 group cursor-pointer flex flex-col ${
+          isFeatured ? 'hover:border-primary-btn' : 'hover:border-amber-700/80'
+        } ${
+          isSlider
+            ? 'w-[300px] sm:w-[410px] flex-shrink-0 snap-start transform hover:-translate-y-2'
+            : 'transform hover:-translate-y-1.5'
+        }`}
+        onClick={() => setSelectedProject(project)}
+      >
+        {/* Project Image Wrapper */}
+        <div className="relative aspect-video overflow-hidden bg-ill-secondary flex-shrink-0">
+          <img
+            src={project.images[0]}
+            alt={project.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            loading="lazy"
+          />
+          <span className="absolute top-3.5 left-3.5 bg-headline/85 backdrop-blur-sm text-white text-[11px] font-semibold px-2.5 py-1 rounded-full shadow-md">
+            {project.role}
+          </span>
+          <span
+            className={`absolute top-3.5 right-3.5 backdrop-blur-sm text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow-md ${
+              isFeatured
+                ? 'bg-primary-btn/95 text-btn-text'
+                : 'bg-amber-800/90 text-white border border-amber-500/40'
+            }`}
+          >
+            {isFeatured ? 'Featured' : 'Practice'}
+          </span>
+        </div>
+
+        {/* Project Content */}
+        <div className="p-6 sm:p-7 flex flex-col flex-grow">
+          <div className="mb-2.5">
+            <h3 className="text-xl sm:text-2xl font-bold text-headline mb-1 group-hover:text-primary-btn transition-colors leading-snug">
+              {project.title}
+            </h3>
+            <p className="text-xs italic text-primary-btn font-medium mb-3 line-clamp-1">
+              {project.subtitle}
+            </p>
+          </div>
+
+          <p className="text-paragraph mb-5 text-sm leading-relaxed line-clamp-3">
+            {project.description}
+          </p>
+
+          {/* Tech Tags */}
+          <div className="flex flex-wrap gap-1.5 mb-6 mt-auto">
+            {project.tech.slice(0, 3).map((t, i) => (
+              <span
+                key={i}
+                className="bg-bg text-link px-2.5 py-0.5 rounded-full text-xs font-medium border border-link/40"
+              >
+                {t}
+              </span>
+            ))}
+            {project.tech.length > 3 && (
+              <span className="text-xs text-paragraph/70 font-semibold px-1.5 py-0.5">
+                +{project.tech.length - 3} more
+              </span>
+            )}
+          </div>
+
+          {/* Card Action Bar */}
+          <div className="pt-4 border-t border-ill-secondary/60 flex items-center justify-between text-xs mt-auto">
+            <div className="inline-flex items-center text-primary-btn font-bold group-hover:underline">
+              <span>Detail Lengkap</span>
+              <svg
+                className="w-3.5 h-3.5 ml-1.5 group-hover:translate-x-1.5 transition-transform"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2.5"
+                  d="M14 5l7 7m0 0l-7 7m7-7H3"
+                />
+              </svg>
+            </div>
+
+            {/* Quick links */}
+            <div className="flex items-center space-x-1.5" onClick={(e) => e.stopPropagation()}>
+              {project.demoLink && project.demoLink !== '#' && (
+                <a
+                  href={project.demoLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-2 rounded-lg bg-bg text-headline hover:bg-primary-btn hover:text-white transition-all shadow-xs border border-ill-secondary"
+                  title="Buka Demo Langsung"
+                  aria-label="Live Demo"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                    />
+                  </svg>
+                </a>
+              )}
+              {(project.githubLink || project.githubFrontend) && (
+                <a
+                  href={project.githubLink || project.githubFrontend}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-2 rounded-lg bg-bg text-headline hover:bg-headline hover:text-white transition-all shadow-xs border border-ill-secondary"
+                  title="Lihat Source Code GitHub"
+                  aria-label="GitHub"
+                >
+                  <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                    <path
+                      fillRule="evenodd"
+                      d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </a>
+              )}
+            </div>
+          </div>
+        </div>
+      </GlowCard>
+    );
   };
 
   return (
@@ -410,349 +560,156 @@ const Projects = () => {
             Projects &amp; Works
           </h2>
           <p className="text-paragraph max-w-2xl text-sm md:text-base leading-relaxed">
-            Koleksi portofolio yang dirapikan: Proyek Utama berskala penuh disajikan dalam <strong>Slider interaktif</strong>, dan proyek latihan &amp; utilitas disajikan dalam <strong>Grid View</strong> agar mudah dilihat sekaligus.
+            Koleksi proyek lengkap mencakup aplikasi web berskala penuh, pengujian teknis, hingga aplikasi utilitas interaktif. Gunakan filter kategori dan pilih mode tampilan <strong>Grid</strong> atau <strong>Slider</strong> sesuai preferensi Anda.
           </p>
         </div>
 
-        {/* Category Navigation Tabs */}
-        <div className="flex flex-wrap items-center gap-2 md:gap-3 mb-12">
-          <button
-            onClick={() => setActiveCategory('all')}
-            className={`px-4 py-2 rounded-full text-xs md:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer shadow-xs ${
-              activeCategory === 'all'
-                ? 'bg-headline text-white shadow-md scale-102 ring-2 ring-headline/20'
-                : 'bg-white/80 text-headline hover:bg-white border border-ill-secondary hover:border-headline/40'
-            }`}
-          >
-            <span>Semua Proyek</span>
-            <span
-              className={`text-[11px] px-2 py-0.5 rounded-full font-bold transition-colors ${
+        {/* Filter Tabs & View Controls Bar */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10">
+          {/* Category Navigation Tabs */}
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => setActiveCategory('all')}
+              className={`px-4 py-2 rounded-full text-xs md:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer shadow-xs ${
                 activeCategory === 'all'
-                  ? 'bg-white/20 text-white'
-                  : 'bg-ill-secondary/70 text-paragraph'
+                  ? 'bg-headline text-white shadow-md scale-102 ring-2 ring-headline/20'
+                  : 'bg-white/80 text-headline hover:bg-white border border-ill-secondary hover:border-headline/40'
               }`}
             >
-              {projects.length}
-            </span>
-          </button>
+              <span>Semua Proyek</span>
+              <span
+                className={`text-[11px] px-2 py-0.5 rounded-full font-bold transition-colors ${
+                  activeCategory === 'all'
+                    ? 'bg-white/20 text-white'
+                    : 'bg-ill-secondary/70 text-paragraph'
+                }`}
+              >
+                {projects.length}
+              </span>
+            </button>
 
-          <button
-            onClick={() => setActiveCategory('featured')}
-            className={`px-4 py-2 rounded-full text-xs md:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer shadow-xs ${
-              activeCategory === 'featured'
-                ? 'bg-primary-btn text-btn-text shadow-md scale-102 ring-2 ring-primary-btn/30'
-                : 'bg-white/80 text-headline hover:bg-white border border-ill-secondary hover:border-primary-btn/50'
-            }`}
-          >
-            <span>Featured Projects (Slide)</span>
-            <span
-              className={`text-[11px] px-2 py-0.5 rounded-full font-bold transition-colors ${
+            <button
+              onClick={() => setActiveCategory('featured')}
+              className={`px-4 py-2 rounded-full text-xs md:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer shadow-xs ${
                 activeCategory === 'featured'
-                  ? 'bg-white/25 text-white'
-                  : 'bg-ill-secondary/70 text-paragraph'
+                  ? 'bg-primary-btn text-btn-text shadow-md scale-102 ring-2 ring-primary-btn/30'
+                  : 'bg-white/80 text-headline hover:bg-white border border-ill-secondary hover:border-primary-btn/50'
               }`}
             >
-              {featuredProjects.length}
-            </span>
-          </button>
+              <span>Featured Projects</span>
+              <span
+                className={`text-[11px] px-2 py-0.5 rounded-full font-bold transition-colors ${
+                  activeCategory === 'featured'
+                    ? 'bg-white/25 text-white'
+                    : 'bg-ill-secondary/70 text-paragraph'
+                }`}
+              >
+                {featuredCount}
+              </span>
+            </button>
 
-          <button
-            onClick={() => setActiveCategory('learning')}
-            className={`px-4 py-2 rounded-full text-xs md:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer shadow-xs ${
-              activeCategory === 'learning'
-                ? 'bg-[#9a3412] text-white shadow-md scale-102 ring-2 ring-amber-700/30'
-                : 'bg-white/80 text-headline hover:bg-white border border-ill-secondary hover:border-amber-700/50'
-            }`}
-          >
-            <span className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-              Learning &amp; Practice (Grid)
-            </span>
-            <span
-              className={`text-[11px] px-2 py-0.5 rounded-full font-bold transition-colors ${
+            <button
+              onClick={() => setActiveCategory('learning')}
+              className={`px-4 py-2 rounded-full text-xs md:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer shadow-xs ${
                 activeCategory === 'learning'
-                  ? 'bg-white/25 text-white'
-                  : 'bg-ill-secondary/70 text-paragraph'
+                  ? 'bg-[#9a3412] text-white shadow-md scale-102 ring-2 ring-amber-700/30'
+                  : 'bg-white/80 text-headline hover:bg-white border border-ill-secondary hover:border-amber-700/50'
               }`}
             >
-              {learningProjects.length}
-            </span>
-          </button>
-        </div>
+              <span>Learning &amp; Practice</span>
+              <span
+                className={`text-[11px] px-2 py-0.5 rounded-full font-bold transition-colors ${
+                  activeCategory === 'learning'
+                    ? 'bg-white/25 text-white'
+                    : 'bg-ill-secondary/70 text-paragraph'
+                }`}
+              >
+                {learningCount}
+              </span>
+            </button>
+          </div>
 
-        {/* ========================================================================= */}
-        {/* SECTION 1: PROYEK UTAMA (FEATURED) -> SLIDER VIEW                        */}
-        {/* ========================================================================= */}
-        {(activeCategory === 'all' || activeCategory === 'featured') && (
-          <div className="mb-16">
-            {/* Header Proyek Utama dengan Navigasi Slider */}
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-6 gap-4">
-              <div>
-                <div className="inline-flex items-center gap-1.5 bg-primary-btn/15 text-primary-btn text-xs font-bold px-3 py-1 rounded-full mb-2 border border-primary-btn/30">
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary-btn"></span>
-                  BAGIAN UTAMA • SLIDE CAROUSEL
-                </div>
-                <h3 className="text-2xl md:text-3xl font-bold text-headline">
-                  Featured / Main Projects
-                </h3>
-                <p className="text-paragraph text-xs md:text-sm mt-1 max-w-xl">
-                  Proyek berskala penuh, aplikasi produksi, tugas akhir riset, dan pengujian teknis industri. Geser untuk menjelajahi satu per satu.
-                </p>
-              </div>
+          {/* View Mode Toggle (Grid & Slider) + Slider Arrows */}
+          <div className="flex items-center gap-2.5 self-start sm:self-auto">
+            {/* View Mode Switcher */}
+            <div className="flex items-center bg-white/90 p-1 rounded-2xl border-2 border-ill-secondary shadow-xs">
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                  viewMode === 'grid'
+                    ? 'bg-headline text-white shadow-sm'
+                    : 'text-paragraph hover:text-headline hover:bg-black/5'
+                }`}
+                aria-label="Grid View"
+                title="Tampilan Grid"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                </svg>
+                <span>Grid</span>
+              </button>
 
-              {/* Slider Arrow Controls */}
-              <div className="flex space-x-2 self-end sm:self-auto">
+              <button
+                onClick={() => setViewMode('slider')}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                  viewMode === 'slider'
+                    ? 'bg-headline text-white shadow-sm'
+                    : 'text-paragraph hover:text-headline hover:bg-black/5'
+                }`}
+                aria-label="Slider View"
+                title="Tampilan Slider"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
+                </svg>
+                <span>Slider</span>
+              </button>
+            </div>
+
+            {/* Slider Arrow Controls (Active when Slider View is selected) */}
+            {viewMode === 'slider' && (
+              <div className="flex space-x-1.5 animate-fade-in">
                 <button
                   onClick={() => scroll('left')}
-                  className="w-11 h-11 rounded-full border-2 border-ill-secondary flex items-center justify-center text-headline bg-white/90 hover:bg-primary-btn hover:text-btn-text hover:border-primary-btn transition-all active:scale-95 shadow-xs cursor-pointer"
+                  className="w-9 h-9 rounded-full border-2 border-ill-secondary flex items-center justify-center text-headline bg-white/90 hover:bg-primary-btn hover:text-btn-text hover:border-primary-btn transition-all active:scale-95 shadow-xs cursor-pointer"
                   aria-label="Proyek Sebelumnya"
                   title="Geser ke Kiri"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7" />
                   </svg>
                 </button>
                 <button
                   onClick={() => scroll('right')}
-                  className="w-11 h-11 rounded-full border-2 border-ill-secondary flex items-center justify-center text-headline bg-white/90 hover:bg-primary-btn hover:text-btn-text hover:border-primary-btn transition-all active:scale-95 shadow-xs cursor-pointer"
+                  className="w-9 h-9 rounded-full border-2 border-ill-secondary flex items-center justify-center text-headline bg-white/90 hover:bg-primary-btn hover:text-btn-text hover:border-primary-btn transition-all active:scale-95 shadow-xs cursor-pointer"
                   aria-label="Proyek Selanjutnya"
                   title="Geser ke Kanan"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7" />
                   </svg>
                 </button>
               </div>
-            </div>
-
-            {/* Slider Horizontal Track */}
-            <div className="relative">
-              {/* Fade edges */}
-              <div className="absolute left-0 top-0 bottom-0 w-8 md:w-16 bg-gradient-to-r from-bg via-bg/5 to-transparent z-10 pointer-events-none" />
-              <div className="absolute right-0 top-0 bottom-0 w-8 md:w-16 bg-gradient-to-l from-bg via-bg/5 to-transparent z-10 pointer-events-none" />
-
-              <div
-                ref={scrollRef}
-                className="flex gap-6 md:gap-8 overflow-x-auto scroll-smooth scrollbar-hide snap-x snap-mandatory pb-6 px-1"
-              >
-                {featuredProjects.map((project) => (
-                  <GlowCard
-                    key={project.title}
-                    className="w-[300px] sm:w-[410px] flex-shrink-0 bg-white rounded-3xl overflow-hidden border-2 border-ill-secondary hover:border-primary-btn hover:shadow-2xl transition-all group duration-300 transform hover:-translate-y-2 cursor-pointer flex flex-col snap-start"
-                    onClick={() => setSelectedProject(project)}
-                  >
-                    {/* Project Image Wrapper */}
-                    <div className="relative aspect-video overflow-hidden bg-ill-secondary flex-shrink-0">
-                      <img
-                        src={project.images[0]}
-                        alt={project.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        loading="lazy"
-                      />
-                      <span className="absolute top-4 left-4 bg-headline/85 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1 rounded-full shadow-md">
-                        {project.role}
-                      </span>
-                      <span className="absolute top-4 right-4 bg-primary-btn/95 backdrop-blur-sm text-btn-text text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow-md">
-                        Featured
-                      </span>
-                    </div>
-
-                    {/* Project Content */}
-                    <div className="p-7 flex flex-col flex-grow">
-                      <h4 className="text-2xl font-bold text-headline mb-1 group-hover:text-primary-btn transition-colors">
-                        {project.title}
-                      </h4>
-                      <p className="text-xs italic text-primary-btn font-medium mb-3">
-                        {project.subtitle}
-                      </p>
-                      <p className="text-paragraph mb-6 text-sm leading-relaxed line-clamp-3">
-                        {project.description}
-                      </p>
-
-                      {/* Tech Tags */}
-                      <div className="flex flex-wrap gap-1.5 mb-6 mt-auto">
-                        {project.tech.slice(0, 3).map((t, i) => (
-                          <span key={i} className="bg-bg text-link px-2.5 py-0.5 rounded-full text-xs font-medium border border-link/50">
-                            {t}
-                          </span>
-                        ))}
-                        {project.tech.length > 3 && (
-                          <span className="text-xs text-paragraph/70 font-semibold px-2 py-0.5">
-                            +{project.tech.length - 3} more
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Action Bar */}
-                      <div className="pt-4 border-t border-ill-secondary/60 flex items-center justify-between text-xs mt-auto">
-                        <div className="inline-flex items-center text-primary-btn font-bold group-hover:underline">
-                          <span>View Project Details</span>
-                          <svg className="w-4 h-4 ml-1.5 group-hover:translate-x-1.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                          </svg>
-                        </div>
-
-                        {/* Quick links */}
-                        <div className="flex items-center space-x-1.5" onClick={(e) => e.stopPropagation()}>
-                          {project.demoLink && project.demoLink !== '#' && (
-                            <a
-                              href={project.demoLink}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="p-2 rounded-lg bg-bg text-headline hover:bg-primary-btn hover:text-white transition-all shadow-xs border border-ill-secondary"
-                              title="Live Demo"
-                              aria-label="Live Demo"
-                            >
-                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                              </svg>
-                            </a>
-                          )}
-                          {(project.githubLink || project.githubFrontend) && (
-                            <a
-                              href={project.githubLink || project.githubFrontend}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="p-2 rounded-lg bg-bg text-headline hover:bg-headline hover:text-white transition-all shadow-xs border border-ill-secondary"
-                              title="GitHub Source"
-                              aria-label="GitHub"
-                            >
-                              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
-                                <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" />
-                              </svg>
-                            </a>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </GlowCard>
-                ))}
-              </div>
-            </div>
+            )}
           </div>
-        )}
+        </div>
 
-        {/* ========================================================================= */}
-        {/* SECTION 2: GOLONGAN KEDUA (LEARNING / PRACTICE) -> GRID VIEW              */}
-        {/* ========================================================================= */}
-        {(activeCategory === 'all' || activeCategory === 'learning') && (
-          <div className={`${activeCategory === 'all' ? 'pt-10 border-t-2 border-ill-secondary/50' : ''}`}>
-            {/* Header Golongan Kedua */}
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
-              <div>
-                <div className="inline-flex items-center gap-1.5 bg-amber-500/15 text-amber-800 text-xs font-bold px-3 py-1 rounded-full mb-2 border border-amber-600/30">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-600 animate-pulse"></span>
-                  GOLONGAN KEDUA • GRID VIEW (SEMUA TERLIHAT)
-                </div>
-                <h3 className="text-2xl md:text-3xl font-bold text-headline flex items-center gap-2.5">
-                  <span>Learning &amp; Practice Projects</span>
-                  <span className="text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300 px-2.5 py-0.5 rounded-full">
-                    {learningProjects.length} Proyek
-                  </span>
-                </h3>
-                <p className="text-paragraph text-xs md:text-sm mt-1 max-w-2xl leading-relaxed">
-                  Kumpulan proyek latihan, kalkulator utilitas, generator, dan eksperimen web interaktif yang disajikan dalam format <strong>Grid</strong> sehingga mudah dilihat semua sekaligus tanpa harus geser satu per satu.
-                </p>
-              </div>
-            </div>
+        {/* Gallery Content based on View Mode */}
+        {viewMode === 'grid' ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-7 animate-fade-in">
+            {filteredProjects.map((project) => renderProjectCard(project, 'grid'))}
+          </div>
+        ) : (
+          <div className="relative animate-fade-in">
+            {/* Edge Fades */}
+            <div className="absolute left-0 top-0 bottom-0 w-8 md:w-16 bg-gradient-to-r from-bg via-bg/5 to-transparent z-10 pointer-events-none" />
+            <div className="absolute right-0 top-0 bottom-0 w-8 md:w-16 bg-gradient-to-l from-bg via-bg/5 to-transparent z-10 pointer-events-none" />
 
-            {/* Grid Layout untuk Learning / Practice Projects */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-7">
-              {learningProjects.map((project) => (
-                <GlowCard
-                  key={project.title}
-                  className="bg-white rounded-3xl overflow-hidden border-2 border-ill-secondary hover:border-amber-700/80 hover:shadow-xl transition-all duration-300 group flex flex-col cursor-pointer transform hover:-translate-y-1.5"
-                  onClick={() => setSelectedProject(project)}
-                >
-                  {/* Project Image Wrapper */}
-                  <div className="relative aspect-video overflow-hidden bg-ill-secondary flex-shrink-0">
-                    <img
-                      src={project.images[0]}
-                      alt={project.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      loading="lazy"
-                    />
-                    <span className="absolute top-3.5 left-3.5 bg-headline/85 backdrop-blur-sm text-white text-[11px] font-semibold px-2.5 py-1 rounded-full shadow-md">
-                      {project.role}
-                    </span>
-                    <span className="absolute top-3.5 right-3.5 bg-amber-800/90 backdrop-blur-sm text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow-md border border-amber-500/40">
-                      Practice Project
-                    </span>
-                  </div>
-
-                  {/* Project Content */}
-                  <div className="p-6 md:p-7 flex flex-col flex-grow">
-                    <div className="mb-2.5">
-                      <h4 className="text-xl font-bold text-headline mb-1 group-hover:text-primary-btn transition-colors leading-snug">
-                        {project.title}
-                      </h4>
-                      <p className="text-xs italic text-primary-btn font-medium line-clamp-1">
-                        {project.subtitle}
-                      </p>
-                    </div>
-
-                    <p className="text-paragraph mb-5 text-sm leading-relaxed line-clamp-3">
-                      {project.description}
-                    </p>
-
-                    {/* Tech Tags */}
-                    <div className="flex flex-wrap gap-1.5 mb-6 mt-auto">
-                      {project.tech.slice(0, 3).map((t, i) => (
-                        <span key={i} className="bg-bg text-link px-2.5 py-0.5 rounded-full text-xs font-medium border border-link/40">
-                          {t}
-                        </span>
-                      ))}
-                      {project.tech.length > 3 && (
-                        <span className="text-xs text-paragraph/70 font-semibold px-1.5 py-0.5">
-                          +{project.tech.length - 3} more
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Card Action Bar */}
-                    <div className="pt-4 border-t border-ill-secondary/60 flex items-center justify-between text-xs mt-auto">
-                      <span className="inline-flex items-center text-primary-btn font-bold group-hover:underline">
-                        <span>Detail Lengkap</span>
-                        <svg className="w-3.5 h-3.5 ml-1.5 group-hover:translate-x-1.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                        </svg>
-                      </span>
-
-                      {/* Quick Demo & GitHub shortcuts */}
-                      <div className="flex items-center space-x-1.5" onClick={(e) => e.stopPropagation()}>
-                        {project.demoLink && project.demoLink !== '#' && (
-                          <a
-                            href={project.demoLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="p-2 rounded-lg bg-bg text-headline hover:bg-primary-btn hover:text-white transition-all shadow-xs border border-ill-secondary"
-                            title="Buka Demo Langsung"
-                            aria-label="Live Demo"
-                          >
-                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                            </svg>
-                          </a>
-                        )}
-                        {(project.githubLink || project.githubFrontend) && (
-                          <a
-                            href={project.githubLink || project.githubFrontend}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="p-2 rounded-lg bg-bg text-headline hover:bg-headline hover:text-white transition-all shadow-xs border border-ill-secondary"
-                            title="Lihat Source Code GitHub"
-                            aria-label="GitHub"
-                          >
-                            <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
-                              <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" />
-                            </svg>
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </GlowCard>
-              ))}
+            <div
+              ref={scrollRef}
+              className="flex gap-6 md:gap-8 overflow-x-auto scroll-smooth scrollbar-hide snap-x snap-mandatory pb-6 px-1"
+            >
+              {filteredProjects.map((project) => renderProjectCard(project, 'slider'))}
             </div>
           </div>
         )}

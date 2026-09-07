@@ -5,7 +5,7 @@ import ShinyText from './ShinyText';
 import Magnet from './Magnet';
 
 // Import Resume PDF
-import myResume from '../assets/certifikat/Yesaya-Parapat-Resume.pdf';
+import myResume from '../assets/certifikat/CV-YesayaParapat.pdf';
 
 const Hero = () => {
   return (
